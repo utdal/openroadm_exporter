@@ -15,7 +15,7 @@ type Configuration struct {
 	Global Global            `yaml:"global"`
 }
 
-// Config contains the information required by junos_collector to create SSH based NETCONF connections.
+// Config contains the information required by openroadm_collector to create SSH based NETCONF connections.
 type Config struct {
 	Username            string   `yaml:"username"`
 	Timeout             int      `yaml:"timeout"`
@@ -25,16 +25,14 @@ type Config struct {
 	Collectors          []string `yaml:"enabled_collectors"`
 	InterfaceDescKeys   []string `yaml:"interface_description_keys"`
 	InterfaceMetricKeys []string `yaml:"interface_metric_keys"`
-	BGPTypeKeys         []string `yaml:"bgp_peer_type_keys"`
 }
 
-// Global contains the global information required by junos_collector to create SSH based NETCONF connections.
+// Global contains the global information required by openroadm_collector to create SSH based NETCONF connections.
 type Global struct {
 	AllowedTargets      []string `yaml:"allowed_targets"`
 	Timeout             int      `yaml:"timeout"`
 	InterfaceDescKeys   []string `yaml:"interface_description_keys"`
 	InterfaceMetricKeys []string `yaml:"interface_metric_keys"`
-	BGPTypeKeys         []string `yaml:"bgp_peer_type_keys"`
 }
 
 // LoadConfigFile returns a Configs type from a passed file.
