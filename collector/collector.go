@@ -14,17 +14,17 @@ import (
 )
 
 // The namespace used by all metrics.
-const namespace = "junos"
+const namespace = "openroadm"
 
 var (
-	junosTotalScrapeCount = 0.0
-	junosLabels           = []string{"collector"}
-	junosDesc             = map[string]*prometheus.Desc{
-		"ScrapesTotal":   promDesc("scrapes_total", "Total number of times Junos has been scraped.", nil),
-		"ScrapeErrTotal": promDesc("scrape_errors_total", "Total number of errors from a collector.", junosLabels),
-		"ScrapeDuration": promDesc("scrape_duration_seconds", "Time it took for a collector's scrape to complete.", junosLabels),
-		"CollectorUp":    promDesc("collector_up", "Whether the collector's last scrape was successful (1 = successful, 0 = unsuccessful).", junosLabels),
-		"Up":             promDesc("up", "Whether the Junos collector is currently up.", nil),
+	openroadmTotalScrapeCount = 0.0
+	openroadmLabels           = []string{"collector"}
+	openroadmDesc             = map[string]*prometheus.Desc{
+		"ScrapesTotal":   promDesc("scrapes_total", "Total number of times OpenROADM has been scraped.", nil),
+		"ScrapeErrTotal": promDesc("scrape_errors_total", "Total number of errors from a collector.", openroadmLabels),
+		"ScrapeDuration": promDesc("scrape_duration_seconds", "Time it took for a collector's scrape to complete.", openroadmLabels),
+		"CollectorUp":    promDesc("collector_up", "Whether the collector's last scrape was successful (1 = successful, 0 = unsuccessful).", openroadmLabels),
+		"Up":             promDesc("up", "Whether the OpenROADM collector is currently up.", nil),
 	}
 )
 
@@ -61,8 +61,8 @@ func NewExporter(collectors []Collector, config Config) (*Exporter, error) {
 
 // Collect implemented as per the prometheus.Collector interface.
 func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
-	junosTotalScrapeCount++
-	ch <- prometheus.MustNewConstMetric(junosDesc["ScrapesTotal"], prometheus.CounterValue, junosTotalScrapeCount)
+	openroadmTotalScrapeCount++
+	ch <- prometheus.MustNewConstMetric(openroadmDesc["ScrapesTotal"], prometheus.CounterValue, openroadmTotalScrapeCount)
 
 	wg := &sync.WaitGroup{}
 	for _, collector := range e.Collectors {
@@ -79,22 +79,22 @@ func (e *Exporter) runCollector(ch chan<- prometheus.Metric, collector Collector
 	startTime := time.Now()
 	errors, totalErrors := collector.Get(ch, e.config)
 
-	ch <- prometheus.MustNewConstMetric(junosDesc["ScrapeDuration"], prometheus.GaugeValue, float64(time.Since(startTime).Seconds()), collectorName)
-	ch <- prometheus.MustNewConstMetric(junosDesc["ScrapeErrTotal"], prometheus.GaugeValue, totalErrors, collectorName)
+	ch <- prometheus.MustNewConstMetric(openroadmDesc["ScrapeDuration"], prometheus.GaugeValue, float64(time.Since(startTime).Seconds()), collectorName)
+	ch <- prometheus.MustNewConstMetric(openroadmDesc["ScrapeErrTotal"], prometheus.GaugeValue, totalErrors, collectorName)
 
 	if len(errors) > 0 {
-		ch <- prometheus.MustNewConstMetric(junosDesc["CollectorUp"], prometheus.GaugeValue, 0, collector.Name())
+		ch <- prometheus.MustNewConstMetric(openroadmDesc["CollectorUp"], prometheus.GaugeValue, 0, collector.Name())
 		for _, err := range errors {
 			log.Errorf("collector %q scrape failed: %s", collectorName, err)
 		}
 	} else {
-		ch <- prometheus.MustNewConstMetric(junosDesc["CollectorUp"], prometheus.GaugeValue, 1, collectorName)
+		ch <- prometheus.MustNewConstMetric(openroadmDesc["CollectorUp"], prometheus.GaugeValue, 1, collectorName)
 	}
 }
 
 // Describe implemented as per the prometheus.Collector interface.
 func (e *Exporter) Describe(ch chan<- *prometheus.Desc) {
-	for _, desc := range junosDesc {
+	for _, desc := range openroadmDesc {
 		ch <- desc
 	}
 }
