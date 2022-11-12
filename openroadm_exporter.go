@@ -10,14 +10,14 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/prometheus/common/log"
 	"github.com/prometheus/common/version"
-	"github.com/tynany/junos_exporter/collector"
-	"github.com/tynany/junos_exporter/config"
+	"github.com/utdal/openroadm_exporter/collector"
+	"github.com/utdal/openroadm_exporter/config"
 	"golang.org/x/crypto/ssh"
 	kingpin "gopkg.in/alecthomas/kingpin.v2"
 )
 
 var (
-	listenAddress = kingpin.Flag("web.listen-address", "Address on which to expose metrics and web interface.").Default(":9347").String()
+	listenAddress = kingpin.Flag("web.listen-address", "Address on which to expose metrics and web interface.").Default(":9930").String()
 	telemetryPath = kingpin.Flag("web.telemetry-path", "Path under which to expose metrics.").Default("/metrics").String()
 	configPath    = kingpin.Flag("config.path", "Path of the YAML configuration file.").Required().String()
 
@@ -37,7 +37,6 @@ var (
 
 func initCollectors() {
 	collectors = append(collectors, collector.NewInterfaceCollector())
-	collectors = append(collectors, collector.NewBGPCollector())
 	collectors = append(collectors, collector.NewEnvCollector())
 	collectors = append(collectors, collector.NewPowerCollector())
 	collectors = append(collectors, collector.NewRECollector())
@@ -126,7 +125,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 func parseCLI() {
 	log.AddFlags(kingpin.CommandLine)
-	kingpin.Version(version.Print("junos_exporter"))
+	kingpin.Version(version.Print("openroadm_exporter"))
 	kingpin.HelpFlag.Short('h')
 	kingpin.Parse()
 }
@@ -203,33 +202,13 @@ func getInterfaceMetricKeys() {
 	}
 }
 
-func getBGPTypeKeys() {
-	var globalBGPTypeKeys []string
-	if len(bgpTypeKeys) == 0 {
-		if len(collectorConfig.Global.BGPTypeKeys) > 0 {
-			for _, descrKey := range collectorConfig.Global.BGPTypeKeys {
-				globalBGPTypeKeys = append(globalBGPTypeKeys, descrKey)
-			}
-		}
-	}
-	for name, configData := range collectorConfig.Config {
-		if len(configData.BGPTypeKeys) > 0 {
-			for _, metricKey := range configData.BGPTypeKeys {
-				bgpTypeKeys[name] = append(bgpTypeKeys[name], metricKey)
-			}
-		} else {
-			bgpTypeKeys[name] = globalBGPTypeKeys
-		}
-	}
-}
-
 func main() {
-	prometheus.MustRegister(version.NewCollector("junos_exporter"))
+	prometheus.MustRegister(version.NewCollector("openroadm_exporter"))
 
 	initCollectors()
 	parseCLI()
 
-	log.Infof("Starting junos_exporter %s on %s", version.Info(), *listenAddress)
+	log.Infof("Starting openroadm_exporter %s on %s", version.Info(), *listenAddress)
 
 	// Get a list of collector names to validate collectors specified in the config file exist.
 	var collectorNames []string
@@ -253,9 +232,9 @@ func main() {
 	http.HandleFunc(*telemetryPath, handler)
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(`<html>
-			<head><title>junos Exporter</title></head>
+			<head><title>OpenROADM Exporter</title></head>
 			<body>
-			<h1>junos Exporter</h1>
+			<h1>OpenROADM Exporter</h1>
 			<p><a href="` + *telemetryPath + `">Metrics</a></p>
 			</body>
 			</html>`))
