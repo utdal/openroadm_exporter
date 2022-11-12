@@ -1,13 +1,13 @@
-# Junos Exporter
-A Prometheus exporter that collects metrics from Junos devices using SSH NETCONF sessions and exposes them via HTTP, ready for collection by Prometheus.
+# OpenROADM Exporter
+A Prometheus exporter that collects metrics from OpenROADM devices using SSH NETCONF sessions and exposes them via HTTP, ready for collection by Prometheus.
 
 ## Getting Started
-Start junos_exporter with a valid configuration file using the --config.path flag. To then collect the metrics of a device, pass the 'config' and 'target' parameter to the exporter's web interface. For example, http://exporter:9347/metrics?config=default&target=192.168.1.1.
+Start openroadm_exporter with a valid configuration file using the --config.path flag. To then collect the metrics of a device, pass the 'config' and 'target' parameter to the exporter's web interface. For example, http://exporter:9930/metrics?config=default&target=192.168.1.1.
 
 Promethues configuraiton:
 ```
 scrape_configs:
-  - job_name: junos
+  - job_name: openroadm
     static_configs:
       - targets:
         - device1
@@ -19,17 +19,17 @@ scrape_configs:
       - source_labels: [__param_target]
         target_label: instance
       - target_label: __address__
-        replacement: junos_exporter:9347  # Junos exporter's address and port.
+        replacement: junos_exporter:9930  # OpenROADM exporter's address and port.
 ```
 
 Docker:
 ```
-docker run --restart unless-stopped -d -p 9347:9347 -v /home/user/.ssh/ssh_key:/ssh_key  -v /home/user/config.yaml:/config.yaml tynany/junos_exporter
+docker run --restart unless-stopped -d -p 9930:9930 -v /home/user/.ssh/ssh_key:/ssh_key  -v /home/user/config.yaml:/config.yaml utdal/openroadm_exporter
 ```
 The above Docker commands assumes a configuration file that specifies the SSK key as /ssh_key is located locally in /home/user/config.yaml.
 
 ## Configuration file
-Junos Exporter requires a configuration file in the below format:
+OpenROADM Exporter requires a configuration file in the below format:
 ```
 configs:
   default:                       # Name of the configuration
@@ -40,15 +40,12 @@ configs:
     allowed_targets:             # List of targets that can be collected. Optional.
       -          
     enabled_collectors:          # Which collectors to enable. Required.
-      - bgp
       - interface
       - environment
       - power
     interface_description_keys:   # List of JSON keys in the interface description to include as labels in the 'interface_description' metric. Optional.
       - 
     interface_metric_keys:        # List of JSON keys in the interface description to create static metrics from. Optional.
-      -
-    bgp_peer_type_keys:           # List of keys from the JSON formatted BGP peer description of which the values will be used with the junos_bgp_peer_types_up metric. Optional.
       -
 global:
   timeout:                       # SSH Timeout in seconds, globally configured. Optional.
@@ -57,28 +54,19 @@ global:
   interface_description_keys:    # List of JSON keys in the interface description to include as labels in the 'interface_description' metric, globally configured. Optional.
       - 
   interface_metric_keys:         # List of JSON keys in the interface description to create static metrics from, globally configured. Optional.
-    - 
-  bgp_peer_type_keys:            # List of keys from the JSON formatted BGP peer description of which the values will be used with the junos_bgp_peer_types_up metric. Optional.
-    -
 ```
 ### Example
 ```
 configs:
   default:
     timeout: 30
-    username: user1
-    password: securepassword
-    ssh_key: ~/key.pem
+    username: openroadm
+    password: openroadm
+    #ssh_key: ~/key.pem
     allowed_targets:
       - 10.1.0.0
     enabled_collectors:
-      - bgp
       - interface
-  bgp_only:
-    username: user2
-    password: password
-    enabled_collectors:
-      - bgp
 global:
   timeout: 30
   allowed_targets:
@@ -86,7 +74,7 @@ global:
 
 ```
 ### configs
-Each configuration is called by passing the 'config' parameter to the exporter's export web interface. In the above example, to use the default config you would use http://exporter:9347/metrics?config=default and to use the bgp_only config, you would use http://exporter:9347/metrics?config=bgp_only.
+Each configuration is called by passing the 'config' parameter to the exporter's export web interface. In the above example, to use the default config you would use http://exporter:9930/metrics?config=default and to use the bgp_only config, you would use http://exporter:9930/metrics?config=bgp_only.
 
 ### allowed_targets
 If allowed_targets is specified, only those targets may be collected. This is a form of security that stops a malicious user trying to collect details, such as the username and password, by specifying a target they control.
@@ -136,8 +124,8 @@ set interfaces ge-0/0/1 description "{\"type\":\"internet\",,"\commit_bw\":\"100
 ## Development
 ### Building
 ```
-go get github.com/tynany/junos_exporter
-cd ${GOPATH}/src/github.com/tynany/junos_exporter
+go get github.com/utdal/openroadm_exporter
+cd ${GOPATH}/src/github.com/utdal/openroadm_exporter
 go build
 ```
 
