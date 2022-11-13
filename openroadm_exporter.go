@@ -106,7 +106,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 	ne, err := collector.NewExporter(enabledCollectors, config)
 	if err != nil {
-		log.Errorf("could not start exporter: %s", err)
+		println("could not start exporter: %s", err)
 		return
 	}
 
@@ -117,14 +117,14 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		registry,
 	}
 	handlerOpts := promhttp.HandlerOpts{
-		ErrorLog:      log.NewErrorLogger(),
+		#ErrorLog:      log.NewErrorLogger(),
 		ErrorHandling: promhttp.ContinueOnError,
 	}
 	promhttp.HandlerFor(gatherers, handlerOpts).ServeHTTP(w, r)
 }
 
 func parseCLI() {
-	log.AddFlags(kingpin.CommandLine)
+	println(kingpin.CommandLine)
 	kingpin.Version(version.Print("openroadm_exporter"))
 	kingpin.HelpFlag.Short('h')
 	kingpin.Parse()
@@ -208,7 +208,7 @@ func main() {
 	initCollectors()
 	parseCLI()
 
-	log.Infof("Starting openroadm_exporter %s on %s", version.Info(), *listenAddress)
+	println("Starting openroadm_exporter %s on %s", version.Info(), *listenAddress)
 
 	// Get a list of collector names to validate collectors specified in the config file exist.
 	var collectorNames []string
@@ -218,11 +218,11 @@ func main() {
 	var err error
 	collectorConfig, err = config.LoadConfigFile(*configPath, collectorNames)
 	if err != nil {
-		log.Fatal(err)
+		println(err)
 	}
 
 	if err = generateSSHConfig(); err != nil {
-		log.Errorf("could not generate SSH configuration: %s", err)
+		println("could not generate SSH configuration: %s", err)
 	}
 
 	getInterfaceDescriptionKeys()
@@ -241,6 +241,6 @@ func main() {
 	})
 
 	if err := http.ListenAndServe(*listenAddress, nil); err != nil {
-		log.Fatal(err)
+		println(err)
 	}
 }
