@@ -85,7 +85,7 @@ func (e *Exporter) runCollector(ch chan<- prometheus.Metric, collector Collector
 	if len(errors) > 0 {
 		ch <- prometheus.MustNewConstMetric(openroadmDesc["CollectorUp"], prometheus.GaugeValue, 0, collector.Name())
 		for _, err := range errors {
-			log.Errorf("collector %q scrape failed: %s", collectorName, err)
+			println("collector %q scrape failed: %s", collectorName, err)
 		}
 	} else {
 		ch <- prometheus.MustNewConstMetric(openroadmDesc["CollectorUp"], prometheus.GaugeValue, 1, collectorName)
@@ -111,7 +111,7 @@ func newGauge(ch chan<- prometheus.Metric, descName *prometheus.Desc, metric str
 	if metric != "" {
 		i, err := strconv.ParseFloat(strings.TrimSpace(metric), 64)
 		if err != nil {
-			log.Errorf("could not convert metric to float64: %s", err)
+			println"could not convert metric to float64: %s", err)
 		}
 		ch <- prometheus.MustNewConstMetric(descName, prometheus.GaugeValue, i, labels...)
 	}
@@ -121,7 +121,7 @@ func newCounter(ch chan<- prometheus.Metric, descName *prometheus.Desc, metric s
 	if metric != "" {
 		i, err := strconv.ParseFloat(strings.TrimSpace(metric), 64)
 		if err != nil {
-			log.Errorf("could not convert metric to float64: %s", err)
+			println("could not convert metric to float64: %s", err)
 		}
 		ch <- prometheus.MustNewConstMetric(descName, prometheus.CounterValue, i, labels...)
 	}
@@ -132,7 +132,7 @@ func newGaugeMB(ch chan<- prometheus.Metric, descName *prometheus.Desc, metric s
 		re := regexp.MustCompile("[0-9]+")
 		i, err := strconv.ParseFloat(strings.TrimSpace(re.FindString(metric)), 64)
 		if err != nil {
-			log.Errorf("could not convert metric to float64: %s", err)
+			println("could not convert metric to float64: %s", err)
 		}
 
 		ch <- prometheus.MustNewConstMetric(descName, prometheus.GaugeValue, i*1000000, labels...)
